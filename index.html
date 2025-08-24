@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+<link rel="stylesheet" href="styles.css">
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+       <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+     <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loading-spinner"></div>
+            <p>Loading properties...</p>
+        </div>
+
+         <!-- Welcome Section -->
+        <section id="hero-section" class="hero-section">
+            <div class="hero-background"></div>
+            <div class="hero-content">
+                <div class="hero-grid">
+                    <!-- Left Content -->
+                    <div class="hero-text">
+                        <h1 class="hero-title">
+                            DISCOVER YOUR<br>
+                            PERFECT HOME
+                              </h1>
+                        <p class="hero-description">
+                            Explore premium properties with our interactive map. 
+                            Find homes that match your lifestyle and budget in the best neighborhoods.
+                        </p>
+
+                         <!-- Quick Search -->
+                        <div class="hero-search">
+                            <div class="search-input-container">
+                                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <path d="m21 21-4.35-4.35"></path>
+                                </svg>
+                                <input 
+                                    type="text" 
+                                    id="search-input" 
+                                    placeholder="Search by location or description..."
+                                    class="search-input"
+                                >
+                            </div>
+                                <div class="hero-buttons">
+                                    <!--
+                                <button id="map-toggle" class="btn btn-primary">
+                                    <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    View Map
+                                </button>
+                            -->
+                                
+                                <button id="filters-toggle" class="btn btn-outline">
+                                    <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
+                                    </svg>
+                                    Filters
+                                </button>
+                            </div>
+                        </div>
+  <!-- Stats -->
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <div class="stat-number" id="total-properties">0</div>
+                                <div class="stat-label">Properties</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="min-price">$0</div>
+                                <div class="stat-label">Starting From</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="total-locations">0</div>
+                                <div class="stat-label">Locations</div>
+                            </div>
+                        </div>
+                    </div>
+
+        <!-- Right Visual Element -->
+                    <div class="hero-visual">
+                        <div class="geometric-shapes">
+                            <div class="shape shape-1"></div>
+                            <div class="shape shape-2"></div>
+                            <div class="shape shape-3"></div>
+                            <div class="shape shape-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+         <!-- Filters Section -->
+        <section id="filters-section" class="filters-section hidden">
+            <div class="container">
+                <div class="filters-card">
+                    <div class="filters-header">
+                        <h3>Filter Properties</h3>
+                        <button id="clear-filters" class="btn-clear">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            Clear All
+                        </button>
+                    </div>
+                    <div class="filters-content">
+
+      <!-- Price Range -->
+                        <div class="filter-group">
+                            <label class="filter-label">
+                                <svg class="filter-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                                Price Range
+                            </label>
+                            <div class="price-slider-container">
+                                <input type="range" id="price-min" class="price-slider" min="0" max="2000000" value="0" step="50000">
+                                <input type="range" id="price-max" class="price-slider" min="0" max="2000000" value="2000000" step="50000">
+                            </div>
+                            <div class="price-display">
+                                <span class="price-badge" id="price-min-display">$0</span>
+                                <span class="price-separator">to</span>
+                                <span class="price-badge" id="price-max-display">$2,000,000</span>
+                            </div>
+                        </div>
+
+      <!-- Bedrooms -->
+                        <div class="filter-group">
+                            <label class="filter-label">
+                                <svg class="filter-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M2 4v16"></path>
+                                    <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
+                                    <path d="M2 17h20"></path>
+                                    <path d="M6 8v9"></path>
+                                </svg>
+                                Bedrooms
+                            </label>
+                            <div class="filter-buttons" id="bedroom-filters">
+                                <button class="filter-btn active" data-value="">Any</button>
+                                <button class="filter-btn" data-value="1">1</button>
+                                <button class="filter-btn" data-value="2">2</button>
+                                <button class="filter-btn" data-value="3">3</button>
+                                <button class="filter-btn" data-value="4">4</button>
+                                <button class="filter-btn" data-value="5">5</button>
+                            </div>
+                        </div>
+        
+ <!-- Bathrooms -->
+                        <div class="filter-group">
+                            <label class="filter-label">
+                                <svg class="filter-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"></path>
+                                    <line x1="10" y1="5" x2="8" y2="7"></line>
+                                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                                    <line x1="7" y1="19" x2="7" y2="21"></line>
+                                    <line x1="17" y1="19" x2="17" y2="21"></line>
+                                </svg>
+                                Bathrooms
+                            </label>
+                               <div class="filter-buttons" id="bathroom-filters">
+                                <button class="filter-btn active" data-value="">Any</button>
+                                <button class="filter-btn" data-value="1">1</button>
+                                <button class="filter-btn" data-value="2">2</button>
+                                <button class="filter-btn" data-value="3">3</button>
+                                <button class="filter-btn" data-value="4">4</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+         <!-- Main Content Section -->
+        <section id="content-section" class="content-section">
+            <div class="container">
+                
+
+<button id="toggleBtn" class="btn">Show Map</button>
+<div id="mapContainer">
+
+
+    
+<div id="map" style="width:100%; height:100%"></div>
+</div>
+
+
+
+
+
+
+
+
+                <!-- Results Header -->
+                <div class="results-header">
+                    <div class="results-info">
+                        <h2>Available Properties</h2>
+                        <p id="results-count">0 properties found</p>
+                    </div>
+                </div>
+      
+    
+                      <!-- Selected Property Info -->
+                    <div id="selected-property" class="selected-property hidden">
+                        <button id="close-selected-property">Back to Listings ✖</button>
+                        <h3>Selected Property</h3>
+                        <div id="selected-property-content"></div>
+                    </div>
+                </div>
+
+                 <!-- Property List Container -->
+                <div id="property-list" class="property-list">
+                    <div id="property-grid" class="property-grid"></div>
+                </div>
+
+                <div id="pagination-controls" class="pagination"></div>
+
+
+                <!-- No Results -->
+                <div id="no-results" class="no-results hidden">
+                    <div class="no-results-icon">🏠</div>
+                    <h3>No Properties Found</h3>
+                    <p>Try adjusting your search criteria or filters</p>
+                </div>
+
+  <!-- Detail pages (hiddden by default)-->
+             <div id="detail-pages">
+                
+                <!--Will be populated with Javascript-->
+
+             </div> 
+
+
+            </div>
+
+
+
+
+
+        </section>
+    </div>
+
+
+
+   
+    
+     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+      <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
+
