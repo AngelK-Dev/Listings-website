@@ -576,28 +576,8 @@ function updateSelectedListing() {
 
 
 
-// Attach event listeners to selected property
-function attachSelectedPropertyListeners() {
-    const selectedPropertyContent = document.getElementById('selected-property-content');
-    if (!selectedPropertyContent) return;
 
-    selectedPropertyContent.addEventListener('click', (e) => {
-        const favoriteBtn = e.target.closest('.property-favorite');
-        const actionBtn = e.target.closest('.property-action');
-
-        if (favoriteBtn) {
-            e.stopPropagation();
-            favoriteBtn.classList.toggle('favorited');
-            favoriteBtn.style.background = favoriteBtn.classList.contains('favorited') ? '#dc3545' : 'rgba(255,255,255,0.9)';
-            favoriteBtn.style.color = favoriteBtn.classList.contains('favorited') ? 'white' : 'black';
-        } else if (actionBtn) {
-            e.stopPropagation();
-            const listingId = actionBtn.dataset.listingId;
-            showDetail(listingId);
-        }
-    });
-}
-
+        
 // Attach event listeners to property cards
 function attachPropertyCardListeners() {
     const propertyGrid = document.getElementById('property-grid');
@@ -638,14 +618,8 @@ function attachPropertyCardListeners() {
             e.stopPropagation();
             const listingId = actionBtn.dataset.listingId;
             showDetail(listingId);
-        } else if (card) {
-            // Click on property card but not on buttons
-            const listingId = card.dataset.listingId;
-            const listing = AppState.listings.find(l => l._id === listingId);
-            if (listing) {
-                updateState({ selectedListing: listing });
-            }
-        }
+        } 
+        
     });
 }
 
