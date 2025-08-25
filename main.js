@@ -38,7 +38,7 @@ async function loadListings() {
       }
 
       // ✅ choose main image
-      let mainImage = "/assets/no-image.png";
+      let mainImage = "assets/no-image.png";
       if (p.imageUrls && p.imageUrls.length > 0) {
         const first = p.imageUrls[0];
         if (/^https?:\/\//i.test(first)) {
@@ -90,12 +90,12 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 //initialize marker icons
 let redIcon = L.icon({
-    iconUrl: '/assets/red-marker.png',
+    iconUrl: 'assets/red-marker.png',
     iconSize: [38, 38],
 })
 
 let greenIcon = L.icon({
-    iconUrl: '/assets/green-marker.png',
+    iconUrl: 'assets/green-marker.png',
     iconSize: [38, 38],
 })
 
@@ -180,7 +180,7 @@ class PropertyCardGenerator {
           alt="Image of ${listing.address}" 
           loading="lazy">
       `).join("")
-    : `<img src="/assets/no-image.png" class="carousel-image active" alt="No image available">`;
+    : `<img src="assets/no-image.png" class="carousel-image active" alt="No image available">`;
 
         return `
           <div class="property-card" data-listing-id="${listing._id}">
@@ -271,7 +271,7 @@ function createDetailPages(list) {
             alt="Image of ${listing.address}" 
             loading="lazy">
         `).join("")
-      : `<img src="/assets/no-image.png" class="carousel-image active" alt="No image available">`;
+      : `<img src="assets/no-image.png" class="carousel-image active" alt="No image available">`;
 
     return `
       <div class="detail-page" id="detail-${listing._id}">
