@@ -131,7 +131,7 @@ let greenIcon = L.icon({
       .on("click", () => {
         const listing = list.find(l => l.coords?.[0] === coords[0] && l.coords?.[1] === coords[1]);
         if (listing) {
-          updateState({ selectedListing: listing });
+         showDetail(listing._id); 
         }
       });
   });
@@ -290,99 +290,88 @@ class PropertyCardGenerator {
 
 
         // Create detail pages
-function createDetailPages(list) {
-  const container = document.getElementById('detail-pages');
-  container.innerHTML = list.map(listing => {
-    // Build carousel images
-    const images = listing.imageUrls && listing.imageUrls.length > 0
-      ? listing.imageUrls.map((img, idx) => `
-          <img 
-            src="/images/${img}.jpg" 
-            class="carousel-image ${idx === 0 ? 'active' : ''}" 
-            alt="Image of ${listing.address}" 
-            loading="lazy">
-        `).join("")
-      : `<img src="assets/no-image.png" class="carousel-image active" alt="No image available">`;
+class DetailViewGenerator {
+  static generateDetail(listing) {
+    const images =
+      listing.imageUrls && listing.imageUrls.length > 0
+        ? listing.imageUrls
+            .map(
+              (img, idx) => `
+          <img src="/images/${img}.jpg" class="carousel-image ${
+                idx === 0 ? "active" : ""
+              }" alt="Image of ${listing.address}">
+        `
+            )
+            .join("")
+        : `<img src="assets/no-image.png" class="carousel-image active">`;
 
     return `
-      <div class="detail-page" id="detail-${listing._id}">
-        <div class="detail-header">
-          <button type="button" class="back-button"> ← Back to Listings</button>
-
-          <div class="carousel">
-            <div class="carousel-container">
-              ${images}
-            </div>
-            <button class="carousel-btn prev" data-listing-id="${listing._id}">❮</button>
-            <button class="carousel-btn next" data-listing-id="${listing._id}">❯</button>
-          </div>
-
-          <div class="detail-price">$${listing.new_price.toLocaleString()}</div>
+     <div class="detail-view">
+        <button class="back-button">← Back to Listings</button>
+        <div class="carousel">
+         
+          <button class="carousel-btn prev">❮</button>
+           <div class="carousel-container">${images}</div>
+          <button class="carousel-btn next">❯</button>
         </div>
-
-        <div class="detail-content">
-          <h1 class="detail-title">${listing.address}</h1>
-          <p class="detail-description">${listing.description}</p>
-
-          <div class="detail-specs">
-            <div class="spec-item"><div class="spec-label">Bedrooms</div><div class="spec-value">${listing.bedrooms}</div></div>
-            <div class="spec-item"><div class="spec-label">Bathrooms</div><div class="spec-value">${listing.bathrooms}</div></div>
-            <div class="spec-item"><div class="spec-label">Type</div><div class="spec-value">${listing.homeType}</div></div>
-            <div class="spec-item"><div class="spec-label">Status</div><div class="spec-value">${listing.status}</div></div>
-            <div class="spec-item"><div class="spec-label">Direction</div><div class="spec-value">${listing.direction}</div></div>
-            <div class="spec-item"><div class="spec-label">Last Updated</div><div class="spec-value">${listing.lastUpdated}</div></div>
-          </div>
-
-          <div class="contact-section">
-            <h3>Interested in this property?</h3>
-            <button class="contact-button">Contact Agent</button>
-          </div>
+        <h1>${listing.address}</h1>
+        <p>${listing.description}</p>
+         <div class="detail-specs">
+          <div><strong>Bedrooms:</strong> ${listing.bedrooms}</div>
+          <div><strong>Bathrooms:</strong> ${listing.bathrooms}</div>
+          <div><strong>Type:</strong> ${listing.homeType}</div>
+          <div><strong>Status:</strong> ${listing.status}</div>
+          <div><strong>Direction:</strong> ${listing.direction}</div>
+          <div><strong>Last Updated:</strong> ${listing.lastUpdated}</div>
+        </div>
+        <div class="contact-section">
+          <h3>Interested in this property?</h3>
+          <button class="contact-button">Contact Agent</button>
         </div>
       </div>
     `;
-  }).join('');
-
-  // Back button
-  container.onclick = (e) => {
-    const back = e.target.closest('.back-button');
-    if (back) {
-      e.preventDefault();
-      e.stopPropagation();
-      showListings();
-    }
-  };
-
-  // ✅ Enable carousels inside detail pages too
-  initCarousels();
+  }
 }
 
 
 // Show detail page
 function showDetail(id) {
-    const propertyList = document.getElementById('property-list');
-    if (propertyList) propertyList.style.display = 'none'; // hide listings wrapper
+  const listing = AppState.listings.find((l) => l._id == id);
+  if (!listing) return;
 
-    document.querySelectorAll('.detail-page').forEach(page => {
-        page.classList.remove('active');
-    });
+  const container = document.getElementById("detail-pages");
+  container.innerHTML = DetailViewGenerator.generateDetail(listing);
 
-    const page = document.getElementById(`detail-${id}`);
-    if (page) page.classList.add('active');
+  document.getElementById("property-list").style.display = "none";
+  document.getElementById("pagination-controls").style.display = "none";
+  container.style.display = "block";
 
-    document.body.classList.add('no-scroll'); // lock scroll
+  container
+    .querySelector(".back-button")
+    .addEventListener("click", showListings);
+
+  initCarousels();
 }
+
+
 
 // Back to listings
 function showListings() {
-    document.querySelectorAll('.detail-page').forEach(page => {
-        page.classList.remove('active');
-    });
+  // Hide detail container
+  const detailContainer = document.getElementById("detail-pages");
+  if (detailContainer) {
+    detailContainer.innerHTML = "";
+    detailContainer.style.display = "none";
+  }
 
-    const propertyList = document.getElementById('property-list');
-    if (propertyList) propertyList.style.display = 'block'; // show wrapper again
+  // Show property list and pagination
+  document.getElementById("property-list").style.display = "block";
+  document.getElementById("pagination-controls").style.display = "block";
 
-    document.body.classList.remove('no-scroll'); // unlock scroll
+  // Remove scroll lock
+  document.body.classList.remove("no-scroll");
 }
+
 
 // Filter Manager
 class FilterManager {
@@ -470,7 +459,7 @@ function renderApp() {
     }
 
     // Keep selected/detail state in sync
-    updateSelectedListing();
+    
      addMarkers(AppState.filteredListings);
      addHeatmap(AppState.filteredListings);
 }
@@ -582,49 +571,11 @@ function renderPaginationControls(total, page, pageSize) {
 
 
 // Update selected property display
-function updateSelectedListing() {
-    const selectedPropertyContainer = document.getElementById('selected-property');
-    const selectedPropertyContent = document.getElementById('selected-property-content');
-    const propertyList = document.getElementById('property-list');
 
-    if (!selectedPropertyContainer || !selectedPropertyContent) return;
-
-    if (AppState.selectedListing) {
-        // Show single property view
-        selectedPropertyContainer.classList.remove('hidden');
-        selectedPropertyContent.innerHTML = PropertyCardGenerator.generateCard(AppState.selectedListing);
-
-        propertyList.classList.add('hidden'); // hide listings
-        attachSelectedPropertyListeners();
-    } else {
-        // Back to listings
-        selectedPropertyContainer.classList.add('hidden');
-        propertyList.classList.remove('hidden');
-    }
-}
 
 
 // Attach event listeners to selected property
-function attachSelectedPropertyListeners() {
-    const selectedPropertyContent = document.getElementById('selected-property-content');
-    if (!selectedPropertyContent) return;
 
-    selectedPropertyContent.addEventListener('click', (e) => {
-        const favoriteBtn = e.target.closest('.property-favorite');
-        const actionBtn = e.target.closest('.property-action');
-
-        if (favoriteBtn) {
-            e.stopPropagation();
-            favoriteBtn.classList.toggle('favorited');
-            favoriteBtn.style.background = favoriteBtn.classList.contains('favorited') ? '#dc3545' : 'rgba(255,255,255,0.9)';
-            favoriteBtn.style.color = favoriteBtn.classList.contains('favorited') ? 'white' : 'black';
-        } else if (actionBtn) {
-            e.stopPropagation();
-            const listingId = actionBtn.dataset.listingId;
-            showDetail(listingId);
-        }
-    });
-}
 
         
 // Attach event listeners to property cards
@@ -848,7 +799,7 @@ async function initApp() {
 
     FilterManager.updatePriceDisplay(0, maxPrice);
 
-    createDetailPages(listings);
+    
 
     // Render first page of properties
     currentPage = 1;
