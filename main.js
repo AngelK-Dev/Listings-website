@@ -1,6 +1,5 @@
 //For properties.json
 
-
 // Global Application State
 const AppState = {
     listings: [],
@@ -17,7 +16,6 @@ const AppState = {
 };
 
 // Load listings from JSON file 
-// Load listings from JSON file 
 async function loadListings() {
   try {
     const res = await fetch("./listings.json");
@@ -32,12 +30,14 @@ async function loadListings() {
       // ✅ handle coords correctly
       let coords = null;
       if (Array.isArray(p.coords) && p.coords.length === 2) {
-        coords = p.coords; // already [lat, lng]
+        coords = p.coords; 
+      }else if (p.latitude && p.longitude) {
+        coords = [p.latitude, p.longitude];
       } else if (p.lat && p.lng) {
-        coords = [p.lat, p.lng]; // build from lat/lng
+        coords = [p.lat, p.lng]; 
       }
 
-      // ✅ choose main image
+      
       let mainImage = "assets/no-image.png";
       if (p.imageUrls && p.imageUrls.length > 0) {
         const first = p.imageUrls[0];
@@ -62,9 +62,9 @@ async function loadListings() {
         original_price: original,
         new_price: current,
         price: current,
-        bedrooms: p.bedrooms ?? null,
-        bathrooms: p.bathrooms ?? null,
-        coords,   // ✅ now always set if available
+        bedrooms: p.bedrooms ?? p.beds ?? null,
+        bathrooms: p.bathrooms ?? p.baths ?? null,
+        coords,  
         lastUpdated: p.lastUpdated || "",
         priceHistory: p.priceHistory || []
       };
@@ -75,12 +75,12 @@ async function loadListings() {
   }
 }
 
-
 const toggleBtn = document.getElementById("toggleBtn");
 const mapContainer = document.getElementById("mapContainer");
 
 //initialize map 
-let map = L.map('map').setView([-1.83, -78.18],7);
+let map = L.map('map').setView([-0.199601, -78.441129],13);
+let heatLayer;
 
 //add tile layer
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -100,11 +100,10 @@ let greenIcon = L.icon({
 })
 
 
-
 //loop and add markers
  function addMarkers(list) {
   list.forEach(({ coords, original_price, new_price: newPrice, address }) => {
-    if (!coords) return; // skip if no coordinates
+    if (!coords) return; 
 
     const isIncreased = newPrice > original_price;
     const icon = isIncreased ? greenIcon : redIcon;
@@ -116,8 +115,12 @@ let greenIcon = L.icon({
         <h4 style="margin: 0 0 10px 0;">${address}</h4>
         <div><strong>Original:</strong> $${original_price.toLocaleString()}</div>
         <div><strong>New:</strong> $${newPrice.toLocaleString()}</div>
-        <div style="color: ${isIncreased ? '#28a745' : '#dc3545'}; font-weight: bold;">
-          ${isIncreased ? '+' : ''}$${change.toLocaleString()} (${changePercent}%)
+        <div style="color: ${
+            isIncreased ? '#28a745' : '#dc3545'
+        }; font-weight: bold;">
+          ${
+              isIncreased ? '+' : ''
+          }$${change.toLocaleString()} (${changePercent}%)
         </div>
       </div>
     `;
@@ -134,7 +137,35 @@ let greenIcon = L.icon({
   });
 }
 
+function addHeatmap(list) {
+  if (!list || list.length === 0) return;
 
+  if (heatLayer) {
+    map.removeLayer(heatLayer);
+  }
+
+  const heatData = [];
+  list.forEach(({ coords, original_price, new_price }) => {
+    if (!coords) return;
+    const change = new_price - original_price;
+    const intensity = Math.min(Math.abs(change) / (original_price || 1), 1); // normalize
+
+    heatData.push([...coords, intensity]);
+  });
+
+  heatLayer = L.heatLayer(heatData, {
+    radius: 35,
+    blur: 15,
+    maxZoom: 18,
+    maxOpacity: 1.0,
+    gradient: {
+      0.0: "#8b0000", // price drop
+      0.5: "yellow", // neutral
+      1.0: "#00ff00", // price increase
+    },
+    minOpacity: 0.3,
+  }).addTo(map);
+}
 
 toggleBtn.addEventListener("click", () => {
     if (mapContainer.style.display === 'none') {
@@ -341,7 +372,6 @@ function showDetail(id) {
     document.body.classList.add('no-scroll'); // lock scroll
 }
 
-
 // Back to listings
 function showListings() {
     document.querySelectorAll('.detail-page').forEach(page => {
@@ -353,8 +383,6 @@ function showListings() {
 
     document.body.classList.remove('no-scroll'); // unlock scroll
 }
-
-
 
 // Filter Manager
 class FilterManager {
@@ -443,8 +471,9 @@ function renderApp() {
 
     // Keep selected/detail state in sync
     updateSelectedListing();
+     addMarkers(AppState.filteredListings);
+     addHeatmap(AppState.filteredListings);
 }
-
 
 
 // Update hero statistics
@@ -653,8 +682,7 @@ function setupEventListeners() {
         });
     }
 
-   
-
+    
     // Filters toggle
     const filtersToggle = document.getElementById('filters-toggle');
     if (filtersToggle) {
@@ -828,13 +856,10 @@ async function initApp() {
 
     // Add map markers
     addMarkers(listings);
-
-    // Auto fit map to show all markers
-const bounds = L.latLngBounds([]);
-listings.forEach(l => {
-  if (l.coords) bounds.extend(l.coords);
-});
-if (bounds.isValid()) map.fitBounds(bounds);
+        requestAnimationFrame(() => {
+      map.invalidateSize();
+      addHeatmap(listings);
+    });
 
 
   } catch (error) {
