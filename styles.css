@@ -1031,20 +1031,7 @@ cursor: pointer
 
 
 /*Detail page styles */
-.detail-page{
-    display: none;
 
-    background: white;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow:  0 20px 60px rgba(0,0,0,0.3);
-     margin-top: 20px;
-}
-
-.detail-page.active{
-    display: block;
-
-}
 
 .detail-header{
     position: relative;
@@ -1204,29 +1191,35 @@ body.no-scroll {
 }
 
 #detail-pages {
-  /* keep it, but not strictly required for overlay */
+   display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #fff;
+  overflow-y: auto;
+  padding: 2rem;
 }
 
+/* Fullscreen Detail Page */
 .detail-page {
-   position: fixed;
-  inset: 0;              /* top:0; right:0; bottom:0; left:0 */
+  position: fixed;
+  inset: 0;
   width: 100vw;
   height: 100vh;
-  display: none;
-  background: var(--background, #fff);
-  border-radius: 0;      /* override old rounded card look */
-  margin: 0;             /* override old margin-top */
-  box-shadow: none;      /* override old shadow */
-  z-index: 1000;         /* above hero and the rest */
-  overflow-y: auto;  
-  
+  display: none;              /* hidden by default */
+  background: #fff;           /* or var(--background) */
+  border-radius: 0;
+  margin: 0;
+  box-shadow: none;
+  z-index: 1000;
+  overflow-y: auto;           /* scroll content if too long */
+  padding: 20px;              /* some breathing room */
 }
-
-
 
 .detail-page.active {
-  display: block;
+  display: block;             /* show when active */
 }
+
 
 /* Optional: keep your existing internal styling */
 
@@ -1283,14 +1276,15 @@ body.no-scroll {
 .carousel-container { 
     position: relative; 
     width: 100%; 
-    max-width: 600px; 
+    max-width: 700px; 
     margin: 0 auto; 
  }
 
 .carousel-image { 
-    display: none; 
-    width: 100%; 
-    height: auto; 
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    display: none;
     border-radius: var(--radius-md); }
 
 .carousel-image.active { display: block; }
@@ -1319,3 +1313,6 @@ body.no-scroll {
   line-clamp: 2;
   min-height: 2.8rem;
 }
+
+
+
